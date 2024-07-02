@@ -1,9 +1,8 @@
 package com.example.productservice.controllers;
 
 import com.example.productservice.Models.Product;
-import com.example.productservice.dtos.FakeStoreProductDto;
-import com.example.productservice.dtos.ProductNotFoundDto;
-import com.example.productservice.dtos.ProductNotFoundException;
+import com.example.productservice.commons.AuthenticationCommons;
+import com.example.productservice.dtos.*;
 import com.example.productservice.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,15 +18,26 @@ import java.util.List;
 public class ProductController {
 
     private ProductService productService;
+    private AuthenticationCommons authenticationCommons;
 
     @Autowired
-    public ProductController(@Qualifier("selfProductService") ProductService productService){
+    public ProductController(@Qualifier("selfProductService") ProductService productService, AuthenticationCommons authenticationCommons) {
         this.productService = productService;
+        this.authenticationCommons = authenticationCommons;
     }
 
     @GetMapping
-    public List<Product> getAllProducts() {
-        return productService.getAllProduct();
+    public ResponseEntity<List<Product>> getAllProducts(@RequestHeader("AuthenticationToken") String token) {
+        UserDto userDto = authenticationCommons.validateToken(token);
+        if(userDto == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        for(Role role: userDto.getRoles()){
+           if(role.getRoleType().equals("ADMIN")){
+                return new ResponseEntity<>(productService.getAllProduct(), HttpStatus.OK);
+           }
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     @GetMapping("/{id}")
