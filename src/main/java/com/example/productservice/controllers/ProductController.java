@@ -27,17 +27,17 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts(@RequestHeader("AuthenticationToken") String token) {
-        UserDto userDto = authenticationCommons.validateToken(token);
-        if(userDto == null){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        for(Role role: userDto.getRoles()){
-           if(role.getRoleType().equals("ADMIN")){
+    public ResponseEntity<List<Product>> getAllProducts() {
+//        UserDto userDto = authenticationCommons.validateToken(token);
+//        if(userDto == null){
+//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//        }
+//        for(Role role: userDto.getRoles()){
+//           if(role.getRoleType().equals("ADMIN")){
                 return new ResponseEntity<>(productService.getAllProduct(), HttpStatus.OK);
-           }
-        }
-        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+//           }
+//        }
+//        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     @GetMapping("/{id}")
